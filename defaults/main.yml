@@ -1,0 +1,7 @@
+---
+hashicorp_url: 'https://releases.hashicorp.com'
+hashicorp_staging_dir: '/opt/hashicorp'
+hashicorp_bin_dir: '/usr/local/bin'
+
+terraform_version: '0.12.24'
+packer_version: '1.5.5'

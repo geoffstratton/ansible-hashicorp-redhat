@@ -1,0 +1,37 @@
+---
+- name: Check if Packer is present
+  stat:
+    path: "{{ hashicorp_staging_dir }}/packer"
+  register: packer_present
+  tags:
+    - packer
+
+- name: Install Packer if needed
+  block:
+    - name: Establish Packer paths
+      set_fact:
+        packer_zip: "packer_{{ packer_version }}_linux_amd64.zip"
+        packer_url: "{{ hashicorp_url }}/packer/{{ packer_version }}"
+
+    - name: Download Packer
+      get_url:
+        url: "{{ packer_url }}/{{ packer_zip }}"
+        dest: "{{ hashicorp_staging_dir }}"
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Unzip Packer
+      unarchive:
+        src: "{{ hashicorp_staging_dir }}/{{ packer_zip }}"
+        dest: "{{ hashicorp_bin_dir }}"
+        remote_src: yes
+        owner: root
+        group: root
+        mode: 0755
+
+  when:
+    - not packer_present.stat.exists
+    - ansible_distribution_major_version > '6'
+  tags:
+    - packer

@@ -1,0 +1,21 @@
+---
+- name: Verify
+  hosts: all
+
+  tasks:
+    - name: Check for Terraform
+      stat:
+        path: /usr/local/bin/terraform
+      register: terraform_exists
+
+    - name: Check for Packer
+      stat:
+        path: /usr/local/bin/packer
+      register: packer_exists
+
+    - name: Run assertion for HashiCorp tools
+      assert:
+        that: "{{ item }} is defined and {{ item }}.stat.exists"
+      with_items:
+        - terraform_exists
+        - packer_exists

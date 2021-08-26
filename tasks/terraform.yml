@@ -1,0 +1,37 @@
+---
+- name: Check if Terraform is present
+  stat:
+    path: "{{ hashicorp_bin_dir }}/terraform"
+  register: terraform_present
+  tags:
+    - terraform
+
+- name: Install Terraform if needed
+  block:
+    - name: Establish Terraform paths
+      set_fact:
+        terraform_zip: "terraform_{{ terraform_version }}_linux_amd64.zip"
+        terraform_url: "{{ hashicorp_url }}/terraform/{{ terraform_version }}"
+
+    - name: Download Terraform
+      get_url:
+        url: "{{ terraform_url }}/{{ terraform_zip }}"
+        dest: "{{ hashicorp_staging_dir }}"
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Unzip Terraform
+      unarchive:
+        src: "{{ hashicorp_staging_dir }}/{{ terraform_zip }}"
+        dest: "{{ hashicorp_bin_dir }}"
+        remote_src: yes
+        owner: root
+        group: root
+        mode: 0755
+
+  when:
+    - not terraform_present.stat.exists
+    - ansible_distribution_major_version > '6'
+  tags:
+    - terraform

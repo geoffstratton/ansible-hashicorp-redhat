@@ -1,0 +1,8 @@
+---
+- name: Create Hashicorp staging directory
+  file:
+    name: "{{ hashicorp_staging_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755

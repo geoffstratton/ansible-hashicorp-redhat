@@ -1,0 +1,65 @@
+---
+- name: Check to see if Vault is installed (idempotence)
+  stat:
+    path: "{{ vault_service_file }}"
+  register: vault_exists
+  tags:
+    - vault
+
+- name: Set up Vault in prod mode
+  block:
+    - name: Install unzip if not present
+      package:
+        name: unzip
+        state: present
+
+    - name: Create Vault staging directory
+      file:
+        path: "{{ vault_staging_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Download Vault
+      get_url:
+        url: "{{ packages_url }}vault/{{ vault_version }}/vault_{{ vault_version }}_linux_amd64.zip"
+        dest: "{{ vault_staging_dir }}"
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Unzip Vault
+      unarchive:
+        src: "{{ vault_staging_dir }}/vault_{{ vault_version }}_linux_amd64.zip"
+        dest: "{{ vault_bin_dir }}"
+        owner: root
+        group: root
+        mode: 0644
+        remote_src: yes
+
+    - name: Create the Vault config file
+      template:
+        src: vault_conf.j2
+        dest: "{{ vault_staging_dir }}/config.hcl"
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Create the service file for RHEL 7 and 8
+      template:
+        src: vault_service.j2
+        dest: "{{ vault_service_file }}"
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Start and enable Vault server
+      service:
+        name: vault
+        state: started
+        enabled: yes
+
+  when: not vault_exists.stat.exists and ansible_distribution_major_version > '6'
+  tags:
+    - vault

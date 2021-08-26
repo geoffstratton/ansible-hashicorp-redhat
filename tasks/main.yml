@@ -1,0 +1,22 @@
+# This role installs the HashiCorp suite (Terraform, Packer, Vault) on a Jenkins build server
+# Usage: ansible-playbook main.yml
+---
+- name: Install the HashiCorp prereqs
+  include_tasks: pkgs_to_install.yml
+  tags:
+    - hashicorp
+
+- name: Set up the HashiCorp env
+  include_tasks: hashicorp_setup.yml
+  tags:
+    - hashicorp
+
+- name: Install Packer
+  include_tasks: packer.yml
+  tags:
+    - hashicorp
+
+- name: Install Terraform
+  include_tasks: terraform.yml
+  tags:
+    - hashicorp

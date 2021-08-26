@@ -1,0 +1,7 @@
+---
+- name: Install HashiCorp prereqs
+  package:
+    name: unzip
+    state: present
+  tags:
+    - hashicorp
